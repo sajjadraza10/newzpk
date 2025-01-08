@@ -40,7 +40,22 @@ const articleSlice = createSlice({
       .addCase(fetchArticles.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.error.message || 'Failed to fetch articles';
+      })
+      // Add loadMoreArticles cases
+      .addCase(loadMoreArticles.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(loadMoreArticles.fulfilled, (state, action) => {
+        state.status = 'succeeded';
+        state.items = [...state.items, ...action.payload]; // Append new articles
+        state.page += 1;
+        state.error = null;
+      })
+      .addCase(loadMoreArticles.rejected, (state, action) => {
+        state.status = 'failed';
+        state.error = action.error.message || 'Failed to load more articles';
       });
+      
   }
 });
 

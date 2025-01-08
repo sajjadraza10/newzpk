@@ -1,7 +1,11 @@
 import axios from 'axios';
 import { NewsApiResponse, NewsApiParams } from '../types/newsApi.types';
 
-const API_KEY = 'a7fe58c3c0d249cbb7b9f6a14e48dbd7';
+const API_KEY = process.env.REACT_APP_NEWS_API_KEY;
+
+if (!API_KEY) {
+  throw new Error('NEWS_API_KEY is not defined in environment variables');
+}
 
 const newsApi = axios.create({
   baseURL: 'https://newsapi.org/v2',
