@@ -7,9 +7,12 @@ import {
   HeartOutlined,
   ShareAltOutlined,
   DownloadOutlined,
+  FileImageOutlined
 } from "@ant-design/icons";
 
 import { Article } from "types/types";
+import { DEFAULT_IMAGE } from "constants/DefaultImage";
+
 
 function ArticleCard({
   title,
@@ -22,11 +25,17 @@ function ArticleCard({
   shares,
 }: Article) {
   const [imageLoading, setImageLoading] = useState(true);
+  const [imageError, setImageError] = useState(false);
+
+  const handleImageError = () => {
+    setImageError(true);
+    setImageLoading(false);
+  };
+
 
   return (
     <AntCard
       className="bg-[#1a1a1a] border-none overflow-hidden"
-      bodyStyle={{ padding: "24px" }}
     >
       <div className="flex items-center gap-3 mb-4">
         <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-pink-500 rounded-lg flex items-center justify-center text-white font-semibold">
@@ -43,17 +52,25 @@ function ArticleCard({
             <div className="animate-pulse bg-gray-700 w-full h-full" />
           )}
         </div>
-        <Image
-          src={imageUrl}
-          alt={title}
-          className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
-          loading="lazy"
-          preview={false}
-          placeholder={
-            <div className="animate-pulse bg-gray-700 w-full h-full" />
-          }
-        />
+        {imageError || !imageUrl ? (
+          <div className="w-full h-full bg-gray-700 flex items-center justify-center">
+            <FileImageOutlined className="text-4xl text-gray-500" />
+          </div>
+        ) : (
+          <Image
+            src={imageUrl || DEFAULT_IMAGE}
+            alt={title}
+            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+            loading="lazy"
+            preview={false}
+            onError={handleImageError}
+            placeholder={
+              <div className="animate-pulse bg-gray-700 w-full h-full" />
+            }
+          />
+        )}
       </div>
+
       <h2 className="text-white text-lg font-semibold mb-2 line-clamp-2 hover:text-red-500 transition-colors cursor-pointer">
         {title}
       </h2>

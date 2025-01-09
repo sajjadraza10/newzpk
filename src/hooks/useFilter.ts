@@ -17,7 +17,6 @@ export const useFilter = (sections: FilterSectionConfig[]) => {
     createEmptyFilterState(sections)
   );
 
-  // Clearly named handlers with single responsibility
   const updateFilter = useCallback((filterKey: string, newValues: FilterValues) => {
     setFilters(currentFilters => ({    ...currentFilters,
     [filterKey]: newValues

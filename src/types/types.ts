@@ -1,12 +1,17 @@
+// 1. Core Enums & Types
 export enum CategoryEnum {
-  NEWS = "NEWS",
-  SPORTS = "SPORTS",
-  ENTERTAINMENT = "ENTERTAINMENT",
-  TECHNOLOGY = "TECHNOLOGY",
+  NEWS = "general",
+  SPORTS = "sports",
+  ENTERTAINMENT = "entertainment",
+  TECHNOLOGY = "technology",
+  CUSTOMIZE_FEED = "customize feed"
 }
-export type Category = "NEWS" | "SPORTS" | "ENTERTAINMENT" | "TECHNOLOGY";
 
+export type Category = CategoryEnum;
+
+// 2. Article Related Types
 export type Article = {
+  id: string;
   title: string;
   source: string;
   author: string;
@@ -17,11 +22,39 @@ export type Article = {
   shares: number;
 };
 
+export interface ArticleState {
+  items: Article[];
+  status: 'idle' | 'loading' | 'succeeded' | 'failed';
+  error: string | null;
+  page: number;
+  hasMore: boolean;
+}
+
+export type ArticleResponse = {
+  articles: Article[];
+  hasMore: boolean;
+};
+
+export type FetchArticlesParams = {
+  category: Category;
+  page?: number;
+  searchQuery?: string;
+}
+
+// 3. Filter Related Types
 export type FilterOption = {
   value: string;
   label: string;
 };
 
+export type FilterState = {
+  sources: string[];
+  categories: string[];
+  authors: string[];
+  searchQuery: string;
+};
+
+// 4. Component Props Types
 export type FilterModalProps = {
   isOpen: boolean;
   onClose: () => void;
@@ -35,45 +68,21 @@ export type FilterSectionConfig = {
   key: string;
   title: string;
   options: FilterOption[];
-}
-
-export type FilterSectionProps = {
-  title: string;
-  options: FilterOption[];
-  value: string[];
-  onChange: (values: string[]) => void;
 };
 
-export type FilterState = {
-  sources: string[];
-  categories: string[];
-  authors: string[];
-  searchQuery: string;
-  dateRange?: [Date, Date];
-}
-
-export type ArticleParams = {
-  category: Category;
-  page?: number;
-  filters?: FilterState;
-};
-
-export interface ArticleState {
-  items: Article[];
-  status: 'idle' | 'loading' | 'succeeded' | 'failed';
-  error: string | null;
-  page: number;
-}
-
-export interface UseArticlesReturn {
+// 5. Hook Return Types
+export type UseArticlesReturn = {
   articles: Article[];
   loading: boolean;
   categoryLoading: boolean;
   error: string | null;
   loadMore: () => void;
+  hasMore: boolean;
 }
 
+
+// 6. Store Types
 export type RootState = {
   articles: ArticleState;
   filters: FilterState;
-}
+};

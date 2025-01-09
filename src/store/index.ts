@@ -7,10 +7,6 @@ export const store = configureStore({
     articles: articleReducer,
     filters: filterReducer
   },
-  middleware: (getDefaultMiddleware) => 
-    getDefaultMiddleware({
-      serializableCheck: false
-    })
 });
 
 export type RootState = ReturnType<typeof store.getState>;

@@ -1,6 +1,5 @@
 import { memo } from 'react';
 import { Select, Typography } from 'antd';
-import { FilterSectionProps } from '../../../types/types'
 
 const { Text } = Typography;
 
@@ -9,7 +8,7 @@ export const FilterSection = memo(({
   options,
   value,
   onChange
-}: FilterSectionProps) => (
+}: any) => (
   <div>
     <Text strong className="text-gray-300 mb-2 block">
       {title}

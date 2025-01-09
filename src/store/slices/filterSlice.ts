@@ -6,7 +6,6 @@ const initialState: FilterState = {
   categories: [],
   authors: [],
   searchQuery: '',
-//   dateRange: null
 };
 
 const filterSlice = createSlice({

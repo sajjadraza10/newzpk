@@ -3,26 +3,31 @@ import { Input, Button, Badge } from "antd";
 import { SearchOutlined, FilterOutlined } from "@ant-design/icons";
 import FilterModal from "../common/FilterModal";
 import { Category, CategoryEnum } from "types/types";
+import { formatCategoryText } from "utils/utilities";
+// import { useSearch } from "hooks/useSearch";
 
 interface HeaderProps {
-  onCategoryChange: (category: Category) => void;
+  onCategoryChange: (category: CategoryEnum) => void;
 }
-const navigationItems: Category[] = [
+
+const navigationItems: CategoryEnum[] = [
   CategoryEnum.NEWS,
   CategoryEnum.SPORTS,
   CategoryEnum.ENTERTAINMENT,
   CategoryEnum.TECHNOLOGY,
+  CategoryEnum.CUSTOMIZE_FEED,
 ];
-
 const Header: React.FC<HeaderProps> = ({ onCategoryChange }) => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [activeFilters, setActiveFilters] = useState(0);
-  const [activeCategory, setActiveCategory] = useState<Category>("NEWS");
+  const [activeCategory, setActiveCategory] = useState<CategoryEnum>(CategoryEnum.NEWS);
+  // const { handleSearch } = useSearch();
 
-  const handleCategoryChange = (category: Category): void => {
+  const handleCategoryChange = (category: CategoryEnum): void => {
     setActiveCategory(category);
     onCategoryChange(category);
   };
+  
   return (
     <header className="bg-[#1a1a1a] text-white sticky top-0 z-50 backdrop-blur-lg bg-opacity-90">
       <div className="container mx-auto px-4">
@@ -31,7 +36,7 @@ const Header: React.FC<HeaderProps> = ({ onCategoryChange }) => {
             href="/"
             className="text-3xl font-bold bg-gradient-to-r from-red-500 to-pink-500 bg-clip-text text-transparent"
           >
-            newsPK
+            newzPK
           </a>
           <div className="flex items-center gap-4">
             <Badge count={activeFilters} offset={[-2, 2]}>
@@ -46,13 +51,14 @@ const Header: React.FC<HeaderProps> = ({ onCategoryChange }) => {
             </Badge>
             <Input
               prefix={<SearchOutlined className="text-gray-400" />}
-              placeholder="Search Flipboard"
+              placeholder="Search newzPK"
+              // onChange={(e) => handleSearch(e.target.value)}
               className="w-48 md:w-64 bg-[#333] hover:bg-[#404040] transition-colors"
               bordered={false}
             />
           </div>
         </div>
-        <nav className="flex space-x-8 py-4 text-sm overflow-x-auto scrollbar-hide">
+        <nav className="flex justify-center space-x-12 py-4 text-sm overflow-x-auto scrollbar-hide">
           {navigationItems.map((item) => (
             <button
               key={item}
@@ -61,7 +67,7 @@ const Header: React.FC<HeaderProps> = ({ onCategoryChange }) => {
                 activeCategory === item ? "text-white font-semibold" : ""
               }`}
             >
-              {item}
+              {formatCategoryText(item)}
             </button>
           ))}
         </nav>

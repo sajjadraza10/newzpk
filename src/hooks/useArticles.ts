@@ -1,27 +1,34 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
-import { fetchArticles, loadMoreArticles } from '../store/slices/articleSlice';
-import { Category, UseArticlesReturn } from '../types/types';
+import { clearArticles, fetchArticles, loadMoreArticles } from '../store/slices/articleSlice';
+import { Category, RootState, UseArticlesReturn } from '../types/types';
 
 export const useArticles = (category: Category): UseArticlesReturn => {
   const dispatch = useAppDispatch();
-  const { items, status, error, page } = useAppSelector(state => state.articles);
+  const { items, status, error, page, hasMore } = useAppSelector(
+    (state: RootState) => state.articles
+  );
 
   useEffect(() => {
-    if (category) {
-      dispatch(fetchArticles({ category }));
-    }
+    dispatch(clearArticles());
+    dispatch(fetchArticles({ category }));
   }, [category, dispatch]);
 
-  const loadMore = () => {
-    dispatch(loadMoreArticles({ category, page: page + 1 }));
-  };
+  const handleLoadMore = useCallback(() => {
+    if (status !== 'loading' && hasMore) {
+      dispatch(loadMoreArticles({ 
+        category, 
+        page: page + 1 
+      }));
+    }
+  }, [status, hasMore, page, category, dispatch]);
 
   return {
     articles: items,
     loading: status === 'loading',
     categoryLoading: status === 'loading' && page === 1,
     error,
-    loadMore
+    loadMore: handleLoadMore,
+    hasMore
   };
 };

@@ -14,13 +14,28 @@ const newsApi = axios.create({
   }
 });
 
-export const fetchNewsArticles = async (params: NewsApiParams): Promise<NewsApiResponse> => {
-  const { data } = await newsApi.get<NewsApiResponse>('/everything', {
-    params: {
-      ...params,
-      language: 'en',
-      sortBy: 'publishedAt'
+export const fetchNewsArticles = async (params: any) => {
+  try {
+    const response = await newsApi.get('/top-headlines', {
+      params: {
+        ...params,
+        language: 'en',
+        sortBy: 'publishedAt',
+        apiKey: process.env.REACT_APP_NEWS_API_KEY
+      },
+      headers: {
+        'X-RateLimit-Remaining': '0'
+      }
+    });
+    return response.data;
+  } catch (error: any) {
+    if (error.response?.status === 429) {
+      // Return empty result on rate limit
+      return {
+        articles: [],
+        totalResults: 0
+      };
     }
-  });
-  return data;
+    throw error;
+  }
 };

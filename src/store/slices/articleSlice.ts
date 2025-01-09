@@ -1,62 +1,68 @@
-import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { ArticleState, Category } from '../../types/types';
-import { articleService } from '../../api/services/articleService';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import { ArticleState, Category, ArticleResponse } from "../../types/types";
+import { articleService } from "../../api/services/articleService";
 
 const initialState: ArticleState = {
   items: [],
-  status: 'idle',
+  status: "idle",
   error: null,
-  page: 1
+  page: 1,
+  hasMore: true,
 };
 
-export const fetchArticles = createAsyncThunk(
-  'articles/fetchArticles',
-  async ({ category }: { category: Category }) => {
-    return await articleService.fetchArticles(category);
-  }
-);
+export const fetchArticles = createAsyncThunk<
+  ArticleResponse,
+  { category: Category }
+>("articles/fetchArticles", async ({ category }) => {
+  return await articleService.fetchArticles(category);
+});
 
-export const loadMoreArticles = createAsyncThunk(
-  'articles/loadMore',
-  async ({ category, page }: { category: Category; page: number }) => {
-    return await articleService.fetchArticles(category, page);
-  }
-);
-
+export const loadMoreArticles = createAsyncThunk<
+  ArticleResponse,
+  { category: Category; page: number }
+>("articles/loadMore", async ({ category, page }) => {
+  console.log("LoadMore action triggered:", { category, page });
+  const response = await articleService.fetchArticles(category, page);
+  return response;
+});
 const articleSlice = createSlice({
-  name: 'articles',
+  name: "articles",
   initialState,
-  reducers: {},
+  reducers: {
+    clearArticles: (state) => {
+      state.items = [];
+      state.page = 1;
+      state.hasMore = true;
+      state.status = "loading"; // Set loading when clearing
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchArticles.pending, (state) => {
-        state.status = 'loading';
+        state.status = "loading";
       })
       .addCase(fetchArticles.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.items = action.payload;
+        state.status = "succeeded";
+        state.items = action.payload.articles;
+        state.hasMore = action.payload.hasMore;
         state.error = null;
       })
-      .addCase(fetchArticles.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.error.message || 'Failed to fetch articles';
-      })
-      // Add loadMoreArticles cases
       .addCase(loadMoreArticles.pending, (state) => {
-        state.status = 'loading';
+        state.status = "loading";
       })
       .addCase(loadMoreArticles.fulfilled, (state, action) => {
-        state.status = 'succeeded';
-        state.items = [...state.items, ...action.payload]; // Append new articles
+        state.status = "succeeded";
+        state.items = [...state.items, ...action.payload.articles];
+        state.hasMore = action.payload.hasMore; // Add this line
         state.page += 1;
         state.error = null;
       })
       .addCase(loadMoreArticles.rejected, (state, action) => {
-        state.status = 'failed';
-        state.error = action.error.message || 'Failed to load more articles';
+        state.status = "failed";
+        state.error = action.error.message || "Failed to load more articles";
       });
-      
-  }
+  },
 });
 
+export const { clearArticles } = articleSlice.actions;
 export default articleSlice.reducer;

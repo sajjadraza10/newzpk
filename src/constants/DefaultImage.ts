@@ -1,0 +1,1 @@
+export const DEFAULT_IMAGE = 'https://via.placeholder.com/800x450?text=No+Image+Available';

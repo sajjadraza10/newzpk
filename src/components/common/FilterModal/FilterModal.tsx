@@ -47,7 +47,7 @@ export const FilterModal = memo(({
         title={section.title}
         options={section.options}
         value={getFilterByKey(section.key)}
-        onChange={(values) => updateFilter(section.key, values)}
+        onChange={(values: string[]) => updateFilter(section.key, values)}
       />
     ))
   ), [sections, getFilterByKey, updateFilter]);
