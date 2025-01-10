@@ -9,6 +9,14 @@ export enum CategoryEnum {
 
 export type Category = CategoryEnum;
 
+export type LoadingState = {
+  isInitialLoad: boolean;
+  isLoadingMore: boolean;
+  isCategoryChanging: boolean;
+  //can be use for search
+  isSearching: boolean;
+};
+
 // 2. Article Related Types
 export type Article = {
   id: string;
@@ -28,6 +36,9 @@ export interface ArticleState {
   error: string | null;
   page: number;
   hasMore: boolean;
+  searchQuery: string; 
+  category: Category;
+
 }
 
 export type ArticleResponse = {

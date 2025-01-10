@@ -5,29 +5,31 @@ interface ArticleSkeletonProps {
   count: number;
 }
 
-const ArticleSkeleton: React.FC<ArticleSkeletonProps> = ({ count }) => {
-  return (
-    <>
+const ArticleSkeleton: React.FC<{ count: number }> = ({ count }) => (
+  <>
     {Array(count).fill(null).map((_, index) => (
-      <Card 
-        key={`skeleton-${index}`}
-        className="bg-[#1a1a1a] border-none overflow-hidden" 
-        bodyStyle={{ padding: '24px' }}
-      >
-        <Skeleton.Avatar active size={32} className="mb-4" />
-        <Skeleton.Input active size="small" className="mb-4 w-1/3" />
-        <div className="aspect-[16/9] mb-4 bg-gray-800 rounded-xl" />
-        <Skeleton active paragraph={{ rows: 2 }} />
-        <div className="flex justify-between mt-4">
-          <Skeleton.Button active size="small" className="w-16" />
-          <Skeleton.Button active size="small" className="w-16" />
-          <Skeleton.Button active size="small" className="w-16" />
+      <Card key={index} className="bg-[#1a1a1a] animate-pulse">
+        {/* Source skeleton */}
+        <div className="flex gap-3 mb-4">
+          <div className="w-8 h-8 bg-gray-700 rounded-lg" />
+          <div className="space-y-2">
+            <div className="h-4 w-24 bg-gray-700 rounded" />
+            <div className="h-3 w-32 bg-gray-700 rounded" />
+          </div>
+        </div>
+        
+        {/* Image skeleton */}
+        <div className="aspect-[16/9] bg-gray-700 rounded-xl mb-4" />
+        
+        {/* Content skeleton */}
+        <div className="space-y-4">
+          <div className="h-6 bg-gray-700 rounded w-3/4" />
+          <div className="h-4 bg-gray-700 rounded w-1/2" />
         </div>
       </Card>
     ))}
   </>
-  );
-}
+);
 
 export default ArticleSkeleton;
 

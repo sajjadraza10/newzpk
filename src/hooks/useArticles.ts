@@ -5,23 +5,29 @@ import { Category, RootState, UseArticlesReturn } from '../types/types';
 
 export const useArticles = (category: Category): UseArticlesReturn => {
   const dispatch = useAppDispatch();
-  const { items, status, error, page, hasMore } = useAppSelector(
-    (state: RootState) => state.articles
-  );
+  const { 
+    items, 
+    status, 
+    error, 
+    page, 
+    hasMore,
+    searchQuery // Add this
+  } = useAppSelector((state: RootState) => state.articles);
 
   useEffect(() => {
     dispatch(clearArticles());
-    dispatch(fetchArticles({ category }));
-  }, [category, dispatch]);
+    dispatch(fetchArticles({ category, searchQuery })); // Pass searchQuery
+  }, [category, searchQuery, dispatch]); // Add searchQuery to dependencies
 
   const handleLoadMore = useCallback(() => {
     if (status !== 'loading' && hasMore) {
       dispatch(loadMoreArticles({ 
         category, 
-        page: page + 1 
+        page: page + 1,
+        searchQuery 
       }));
     }
-  }, [status, hasMore, page, category, dispatch]);
+  }, [status, hasMore, page, category, searchQuery, dispatch]);
 
   return {
     articles: items,
