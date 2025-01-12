@@ -4,7 +4,7 @@ import { SearchOutlined, FilterOutlined } from "@ant-design/icons";
 import FilterModal from "../common/FilterModal";
 import { Category, CategoryEnum } from "types/types";
 import { formatCategoryText } from "utils/utilities";
-// import { useSearch } from "hooks/useSearch";
+ import { useSearch } from "hooks/useSearch";
 
 interface HeaderProps {
   onCategoryChange: (category: CategoryEnum) => void;
@@ -21,7 +21,7 @@ const Header: React.FC<HeaderProps> = ({ onCategoryChange }) => {
   const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
   const [activeFilters, setActiveFilters] = useState(0);
   const [activeCategory, setActiveCategory] = useState<CategoryEnum>(CategoryEnum.NEWS);
-  // const { handleSearch } = useSearch();
+ const { handleSearch } = useSearch();
 
   const handleCategoryChange = (category: CategoryEnum): void => {
     setActiveCategory(category);
@@ -52,7 +52,7 @@ const Header: React.FC<HeaderProps> = ({ onCategoryChange }) => {
             <Input
               prefix={<SearchOutlined className="text-gray-400" />}
               placeholder="Search newzPK"
-              // onChange={(e) => handleSearch(e.target.value)}
+              onChange={(e) => handleSearch(e.target.value)}
               className="w-48 md:w-64 bg-[#333] hover:bg-[#404040] transition-colors"
               bordered={false}
             />
