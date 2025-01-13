@@ -1,9 +1,5 @@
 import React from 'react';
-import { Card, Skeleton } from 'antd';
-
-interface ArticleSkeletonProps {
-  count: number;
-}
+import { Card } from 'antd';
 
 const ArticleSkeleton: React.FC<{ count: number }> = ({ count }) => (
   <>

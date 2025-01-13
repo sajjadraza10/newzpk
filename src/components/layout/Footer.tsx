@@ -1,21 +1,15 @@
-import React from 'react';
-import { Space, Typography } from 'antd';
+import { Space, Typography } from "antd";
 
 const { Text } = Typography;
 
 function Footer() {
   const footerLinks = [
-    'Log In',
-    'Newsletters',
-    'About Us',
-    'Blog',
-    'Tools',
-    'Publishers',
-    'Help',
-    'Terms',
-    'Privacy Policy',
-    'Do Not Sell My Info',
-    'Sitemap',
+    "Newsletters",
+    "Help",
+    "Terms",
+    "Privacy Policy",
+    "Do Not Sell My Info",
+    "Sitemap",
   ];
 
   return (
@@ -37,4 +31,3 @@ function Footer() {
 }
 
 export default Footer;
-

@@ -1,6 +1,12 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { articleService } from "../../api/services/articleService";
-import { Article, ArticleResponse, ArticleState, Category, CategoryEnum } from "../../types/types";
+import {
+  Article,
+  ArticleResponse,
+  ArticleState,
+  Category,
+  CategoryEnum,
+} from "../../types/types";
 
 const initialState: ArticleState = {
   items: [],
@@ -8,25 +14,28 @@ const initialState: ArticleState = {
   error: null,
   page: 1,
   hasMore: true,
-  searchQuery: '',
+  searchQuery: "",
   category: CategoryEnum.NEWS,
   activeFilters: {
     sources: [],
-    categories: []
-  }
+    categories: [],
+  },
 };
 
 export const fetchArticles = createAsyncThunk<
   ArticleResponse,
-  { category: Category; searchQuery?: string; filters?: ArticleState['activeFilters'] }
+  {
+    category: Category;
+    searchQuery?: string;
+    filters?: ArticleState["activeFilters"];
+  }
 >("articles/fetchArticles", async (params) => {
   return await articleService.fetchArticles(params);
 });
 
 export const setFilters = createAsyncThunk(
-  'articles/setFilters',
-  async (filters: ArticleState['activeFilters'], { dispatch }) => {
-    console.log('Setting filters in Redux:', filters); // Debug log
+  "articles/setFilters",
+  async (filters: ArticleState["activeFilters"], { dispatch }) => {
     dispatch(articleSlice.actions.updateActiveFilters(filters));
     return filters;
   }
@@ -34,21 +43,28 @@ export const setFilters = createAsyncThunk(
 
 export const loadMoreArticles = createAsyncThunk<
   ArticleResponse,
-  { category: Category; page: number; searchQuery?: string; filters?: ArticleState['activeFilters'] }
+  {
+    category: Category;
+    page: number;
+    searchQuery?: string;
+    filters?: ArticleState["activeFilters"];
+  }
 >("articles/loadMore", async (params) => {
   return await articleService.fetchArticles({ ...params });
 });
 
 export const searchArticles = createAsyncThunk(
-  'articles/search',
+  "articles/search",
   async (query: string, { dispatch, getState }) => {
     const state = getState() as { articles: ArticleState };
     dispatch(articleSlice.actions.updateSearchQuery(query));
-    return await dispatch(fetchArticles({ 
-      category: state.articles.category,
-      searchQuery: query,
-      filters: state.articles.activeFilters
-    }));
+    return await dispatch(
+      fetchArticles({
+        category: state.articles.category,
+        searchQuery: query,
+        filters: state.articles.activeFilters,
+      })
+    );
   }
 );
 
@@ -67,11 +83,14 @@ const articleSlice = createSlice({
       state.page = 1;
       state.items = [];
     },
-    updateActiveFilters: (state, action: PayloadAction<ArticleState['activeFilters']>) => {
+    updateActiveFilters: (
+      state,
+      action: PayloadAction<ArticleState["activeFilters"]>
+    ) => {
       state.activeFilters = action.payload;
       state.page = 1;
       state.items = [];
-    }
+    },
   },
   extraReducers: (builder) => {
     builder
@@ -104,5 +123,6 @@ const articleSlice = createSlice({
   },
 });
 
-export const { clearArticles, updateSearchQuery, updateActiveFilters } = articleSlice.actions;
+export const { clearArticles, updateSearchQuery, updateActiveFilters } =
+  articleSlice.actions;
 export default articleSlice.reducer;

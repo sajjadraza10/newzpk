@@ -7,12 +7,11 @@ import {
   HeartOutlined,
   ShareAltOutlined,
   DownloadOutlined,
-  FileImageOutlined
+  FileImageOutlined,
 } from "@ant-design/icons";
 
 import { Article } from "types/types";
 import { DEFAULT_IMAGE } from "constants/DefaultImage";
-
 
 function ArticleCard({
   title,
@@ -32,11 +31,8 @@ function ArticleCard({
     setImageLoading(false);
   };
 
-
   return (
-    <AntCard
-      className="bg-[#1a1a1a] border-none overflow-hidden"
-    >
+    <AntCard className="bg-[#1a1a1a] border-none overflow-hidden">
       <div className="flex items-center gap-3 mb-4">
         <div className="w-8 h-8 bg-gradient-to-br from-red-500 to-pink-500 rounded-lg flex items-center justify-center text-white font-semibold">
           {source[0]}
