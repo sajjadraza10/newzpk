@@ -3,16 +3,17 @@ import { Modal, Space, Button, Typography } from "antd";
 import { CloseOutlined } from "@ant-design/icons";
 import { motion, AnimatePresence } from "framer-motion";
 import { FilterModalProps } from "../../../types/types";
-import { sources, categories, authors } from "../../../constants/FilterConfigs";
+import { sources, categories } from "../../../constants/FilterConfigs";
 import { useFilter } from "../../../hooks/useFilter";
 import { FilterSection } from "./FilterSection";
+import { useAppDispatch, useAppSelector } from "store/hooks";
+import { setFilters } from "store/slices/articleSlice";
 
 const { Title } = Typography;
 
 const defaultFilterSections = [
   { key: "sources", title: "Sources", options: sources },
   { key: "categories", title: "Categories", options: categories },
-  { key: "authors", title: "Authors", options: authors },
 ];
 
 export const FilterModal = memo(({ 
@@ -23,12 +24,13 @@ export const FilterModal = memo(({
   title = "Customize Your Feed",
   width = 500
 }: FilterModalProps) => {
+  const dispatch = useAppDispatch();
   const {
     updateFilter,
     clearAllFilters,
     getFilterByKey,
     getSelectedFiltersCount
-  } = useFilter(sections);
+  } = useFilter(defaultFilterSections);
 
   const handleReset = useCallback(() => {
     clearAllFilters();
@@ -36,9 +38,17 @@ export const FilterModal = memo(({
   }, [clearAllFilters, onApply]);
 
   const handleApply = useCallback(() => {
-    onApply(getSelectedFiltersCount());
+    const filters = {
+      sources: getFilterByKey('sources'),
+      categories: getFilterByKey('categories')
+    };
+    
+    if (filters.sources.length > 0 || filters.categories.length > 0) {
+      dispatch(setFilters(filters));
+      onApply(getSelectedFiltersCount());
+    }
     onClose();
-  }, [getSelectedFiltersCount, onApply, onClose]);
+  }, [dispatch, getFilterByKey, getSelectedFiltersCount, onApply, onClose]);
 
   const renderFilterSections = useCallback(() => (
     sections.map((section) => (

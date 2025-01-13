@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { clearArticles, fetchArticles, loadMoreArticles } from '../store/slices/articleSlice';
-import { Category, RootState, UseArticlesReturn } from '../types/types';
+import { Category, CategoryEnum, RootState, UseArticlesReturn } from '../types/types';
 
 export const useArticles = (category: Category): UseArticlesReturn => {
   const dispatch = useAppDispatch();
@@ -11,23 +11,41 @@ export const useArticles = (category: Category): UseArticlesReturn => {
     error, 
     page, 
     hasMore,
-    searchQuery // Add this
+    searchQuery,
+    activeFilters 
   } = useAppSelector((state: RootState) => state.articles);
 
   useEffect(() => {
+    if (category === CategoryEnum.CUSTOMIZE_FEED && 
+        activeFilters.sources.length === 0 && 
+        activeFilters.categories.length === 0) {
+      return; // Don't fetch if no filters in customize feed
+    }
+
     dispatch(clearArticles());
-    dispatch(fetchArticles({ category, searchQuery })); // Pass searchQuery
-  }, [category, searchQuery, dispatch]); // Add searchQuery to dependencies
+    dispatch(fetchArticles({ 
+      category,
+      searchQuery,
+      filters: category === CategoryEnum.CUSTOMIZE_FEED ? activeFilters : undefined
+    }));
+  }, [
+    category, 
+    searchQuery,
+    // Only track filters when in customize feed
+    category === CategoryEnum.CUSTOMIZE_FEED ? JSON.stringify(activeFilters) : null,
+    dispatch
+  ]);
 
   const handleLoadMore = useCallback(() => {
     if (status !== 'loading' && hasMore) {
       dispatch(loadMoreArticles({ 
         category, 
         page: page + 1,
-        searchQuery 
+        searchQuery,
+        filters: category === CategoryEnum.CUSTOMIZE_FEED ? activeFilters : undefined 
       }));
     }
-  }, [status, hasMore, page, category, searchQuery, dispatch]);
+  }, [status, hasMore, page, category, searchQuery, activeFilters, dispatch]);
 
   return {
     articles: items,

@@ -36,9 +36,22 @@ export interface ArticleState {
   error: string | null;
   page: number;
   hasMore: boolean;
-  searchQuery: string; 
-  category: Category;
+  searchQuery: string;
+  category: CategoryEnum;
+  activeFilters: {
+    sources: string[];
+    categories: string[];
+  };
+}
 
+export interface FetchArticlesParams {
+  category: Category;
+  page?: number;
+  searchQuery?: string;
+  filters?: {
+    sources: string[];
+    categories: string[];
+  };
 }
 
 export type ArticleResponse = {
@@ -46,11 +59,20 @@ export type ArticleResponse = {
   hasMore: boolean;
 };
 
-export type FetchArticlesParams = {
+export interface ArticleServiceParams {
   category: Category;
   page?: number;
   searchQuery?: string;
+  filters?: {
+    sources: string[];
+    categories: string[];
+  };
 }
+// export type FetchArticlesParams = {
+//   category: Category;
+//   page?: number;
+//   searchQuery?: string;
+// }
 
 // 3. Filter Related Types
 export type FilterOption = {

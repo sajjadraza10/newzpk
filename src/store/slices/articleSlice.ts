@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
-import { ArticleState, Category, ArticleResponse, CategoryEnum } from "../../types/types";
 import { articleService } from "../../api/services/articleService";
+import { Article, ArticleResponse, ArticleState, Category, CategoryEnum } from "../../types/types";
 
 const initialState: ArticleState = {
   items: [],
@@ -9,34 +9,45 @@ const initialState: ArticleState = {
   page: 1,
   hasMore: true,
   searchQuery: '',
-  category: CategoryEnum.NEWS
+  category: CategoryEnum.NEWS,
+  activeFilters: {
+    sources: [],
+    categories: []
+  }
 };
 
 export const fetchArticles = createAsyncThunk<
   ArticleResponse,
-  { category: Category; searchQuery?: string }
->("articles/fetchArticles", async ({ category, searchQuery }) => {
-  return await articleService.fetchArticles(category, 1, searchQuery);
+  { category: Category; searchQuery?: string; filters?: ArticleState['activeFilters'] }
+>("articles/fetchArticles", async (params) => {
+  return await articleService.fetchArticles(params);
 });
+
+export const setFilters = createAsyncThunk(
+  'articles/setFilters',
+  async (filters: ArticleState['activeFilters'], { dispatch }) => {
+    dispatch(articleSlice.actions.updateActiveFilters(filters));
+    return filters;
+  }
+);
 
 export const loadMoreArticles = createAsyncThunk<
   ArticleResponse,
-  { category: Category; page: number; searchQuery?: string }
->("articles/loadMore", async ({ category, page, searchQuery }) => {
-  return await articleService.fetchArticles(category, page, searchQuery);
+  { category: Category; page: number; searchQuery?: string; filters?: ArticleState['activeFilters'] }
+>("articles/loadMore", async (params) => {
+  return await articleService.fetchArticles({ ...params });
 });
 
 export const searchArticles = createAsyncThunk(
   'articles/search',
   async (query: string, { dispatch, getState }) => {
     const state = getState() as { articles: ArticleState };
-    if (query.length >= 3 || query.length === 0) {
-      dispatch(articleSlice.actions.updateSearchQuery(query));
-      await dispatch(fetchArticles({ 
-        searchQuery: query,
-        category: state.articles.category
-      }));
-    }
+    dispatch(articleSlice.actions.updateSearchQuery(query));
+    return await dispatch(fetchArticles({ 
+      category: state.articles.category,
+      searchQuery: query,
+      filters: state.articles.activeFilters
+    }));
   }
 );
 
@@ -44,41 +55,38 @@ const articleSlice = createSlice({
   name: "articles",
   initialState,
   reducers: {
-    updateSearchQuery: (state, action: PayloadAction<string>) => {
-      state.searchQuery = action.payload;
-      state.page = 1;
-      state.items = [];
-      state.hasMore = true;
-      state.status = "loading";
-    },
-    setCategory: (state, action: PayloadAction<CategoryEnum>) => {
-      state.category = action.payload;
-    },
     clearArticles: (state) => {
       state.items = [];
       state.page = 1;
       state.hasMore = true;
-      state.status = "loading";
-      state.searchQuery = '';
+      state.status = "idle";
     },
+    updateSearchQuery: (state, action: PayloadAction<string>) => {
+      state.searchQuery = action.payload;
+      state.page = 1;
+      state.items = [];
+    },
+    updateActiveFilters: (state, action: PayloadAction<ArticleState['activeFilters']>) => {
+      state.activeFilters = action.payload;
+      state.page = 1;
+      state.items = [];
+    }
   },
   extraReducers: (builder) => {
     builder
-      // Fetch Articles
       .addCase(fetchArticles.pending, (state) => {
         state.status = "loading";
+        state.error = null;
       })
       .addCase(fetchArticles.fulfilled, (state, action) => {
         state.status = "succeeded";
         state.items = action.payload.articles;
         state.hasMore = action.payload.hasMore;
-        state.error = null;
       })
       .addCase(fetchArticles.rejected, (state, action) => {
         state.status = "failed";
-        state.error = action.error.message || "Failed to fetch articles";
+        state.error = action.error.message || "Something went wrong";
       })
-      // Load More
       .addCase(loadMoreArticles.pending, (state) => {
         state.status = "loading";
       })
@@ -87,7 +95,6 @@ const articleSlice = createSlice({
         state.items = [...state.items, ...action.payload.articles];
         state.hasMore = action.payload.hasMore;
         state.page += 1;
-        state.error = null;
       })
       .addCase(loadMoreArticles.rejected, (state, action) => {
         state.status = "failed";
@@ -96,5 +103,5 @@ const articleSlice = createSlice({
   },
 });
 
-export const { clearArticles, updateSearchQuery, setCategory } = articleSlice.actions;
+export const { clearArticles, updateSearchQuery, updateActiveFilters } = articleSlice.actions;
 export default articleSlice.reducer;

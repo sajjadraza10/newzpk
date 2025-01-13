@@ -1,5 +1,5 @@
 import { fetchNewsArticles } from "../clients/newsApiClient";
-import { Article, Category, CategoryEnum } from "../../types/types";
+import { Article, ArticleResponse, ArticleServiceParams, Category, CategoryEnum } from "../../types/types";
 import { NewsApiArticle } from "../types/newsApi.types";
 import { GuardianArticle } from "api/types/guardianApi.types";
 import { NYTArticle } from "api/types/nytApi.types";
@@ -63,69 +63,101 @@ const filterArticlesBySearch = (searchQuery?: string) => {
   };
 };
 
-export const articleService = {
-  async fetchArticles(
-    category: Category,
-    page: number = 1,
-    searchQuery?: string
-  ): Promise<{ articles: Article[]; hasMore: boolean }> {
-    console.log('Fetching articles:', { category, page, searchQuery });
-    
-    try {
-      const filters = filterArticlesBySearch(searchQuery);
-      
-      const [newsApi, guardian, nyt] = await Promise.allSettled([
-        fetchNewsArticles({
-          category: category.toLowerCase(),
-          page,
-          pageSize: ITEMS_PER_SOURCE,
-          q: searchQuery
-        }).catch(error => {
-          console.error('NewsAPI Error:', error);
-          return { articles: [] };
-        }),
-        fetchGuardianArticles({
-          section: getGuardianCategory(category),
-          page,
-          "page-size": ITEMS_PER_SOURCE,
-          q: searchQuery
-        }).catch(error => {
-          console.error('Guardian Error:', error);
-          return { response: { results: [] } };
-        }),
-        fetchNYTArticles({
-          fq: searchQuery 
-            ? `${searchQuery}`  // Simplified query for better results
-            : `news_desk:("${getNYTCategory(category)}")`,
-          page: page - 1
-        }).catch(error => {
-          console.error('NYT Error:', error);
-          return { response: { docs: [] } };
-        })
-      ]);
 
+export const articleService = {
+  async fetchArticles({
+    category,
+    page = 1,
+    searchQuery,
+    filters
+  }: ArticleServiceParams): Promise<ArticleResponse> {
+    try {
+      console.log('ArticleService Filters:', { category, filters });
+      
+      const searchFilters = filterArticlesBySearch(searchQuery);
+      const selectedSources = filters?.sources?.length 
+        ? filters.sources 
+        : ['newsapi', 'guardian', 'nyt'];
+      
+      // Handle category selection for customize feed
+      const selectedCategory = category === CategoryEnum.CUSTOMIZE_FEED && filters?.categories?.length 
+        ? filters.categories[0] as CategoryEnum 
+        : category;
+
+      const fetchPromises = [];
+
+      if (selectedSources.includes('newsapi')) {
+        fetchPromises.push(
+          fetchNewsArticles({
+            category: selectedCategory.toLowerCase(),
+            page,
+            pageSize: ITEMS_PER_SOURCE,
+            q: searchQuery
+          }).catch(error => {
+            console.error('NewsAPI Error:', error);
+            return { articles: [] };
+          })
+        );
+      }
+
+      if (selectedSources.includes('guardian')) {
+        fetchPromises.push(
+          fetchGuardianArticles({
+            section: getGuardianCategory(selectedCategory),
+            page,
+            "page-size": ITEMS_PER_SOURCE,
+            q: searchQuery
+          }).catch(error => {
+            console.error('Guardian Error:', error);
+            return { response: { results: [] } };
+          })
+        );
+      }
+
+      if (selectedSources.includes('nyt')) {
+        fetchPromises.push(
+          fetchNYTArticles({
+            fq: searchQuery 
+              ? `${searchQuery}`
+              : `news_desk:("${getNYTCategory(selectedCategory)}")`,
+            page: page - 1
+          }).catch(error => {
+            console.error('NYT Error:', error);
+            return { response: { docs: [] } };
+          })
+        );
+      }
+
+      const responses = await Promise.allSettled(fetchPromises);
       const articles: Article[] = [];
 
-      if (newsApi.status === "fulfilled") {
-        const newsArticles = newsApi.value.articles
-          .filter(filters.newsApi)
-          .map(mapNewsApiToArticle);
-        articles.push(...newsArticles);
-      }
-      
-      if (guardian.status === "fulfilled") {
-        const guardianArticles = guardian.value.response.results
-          .filter(filters.guardian)
-          .map(mapGuardianToArticle);
-        articles.push(...guardianArticles);
-      }
-      
-      if (nyt.status === "fulfilled") {
-        const nytArticles = nyt.value.response.docs
-          .filter(filters.nyt)
-          .map(mapNYTToArticle);
-        articles.push(...nytArticles);
-      }
+      responses.forEach((response, index) => {
+        if (response.status === "fulfilled") {
+          switch (selectedSources[index]) {
+            case 'newsapi':
+              articles.push(
+                ...response.value.articles
+                  .filter(searchFilters.newsApi)
+                  .map(mapNewsApiToArticle)
+              );
+              break;
+            case 'guardian':
+              articles.push(
+                ...response.value.response.results
+                  .filter(searchFilters.guardian)
+                  .map(mapGuardianToArticle)
+              );
+              break;
+            case 'nyt':
+              articles.push(
+                ...response.value.response.docs
+                  .filter(searchFilters.nyt)
+                  .map(mapNYTToArticle)
+              );
+              break;
+          }
+        }
+      });
 
       const uniqueArticles = articles
         .sort((a, b) => new Date(b.timeAgo).getTime() - new Date(a.timeAgo).getTime())
@@ -138,11 +170,9 @@ export const articleService = {
         sources: [...new Set(uniqueArticles.map(a => a.source))]
       });
 
-      const hasMore = page < 5 && uniqueArticles.length >= ITEMS_PER_SOURCE;
-
       return {
         articles: uniqueArticles,
-        hasMore
+        hasMore: page < 5 && uniqueArticles.length >= ITEMS_PER_SOURCE
       };
 
     } catch (error) {

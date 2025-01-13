@@ -18,11 +18,12 @@ export const useFilter = (sections: FilterSectionConfig[]) => {
   );
 
   const updateFilter = useCallback((filterKey: string, newValues: FilterValues) => {
-    setFilters(currentFilters => ({    ...currentFilters,
-    [filterKey]: newValues
+    setFilters(currentFilters => ({
+      ...currentFilters,
+      [filterKey]: newValues
     }));
-  }, []);
-
+  }, [])
+  
   const clearAllFilters = useCallback(() => {
     setFilters(createEmptyFilterState(sections));
   }, [sections]);
