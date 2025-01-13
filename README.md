@@ -95,9 +95,54 @@ Welcome to the **News Aggregate Challenge** application documentation. This proj
 ### TODO:
 Testing and some optimzzation are still left due to time constraints
 
+### Docker Setup
 
-### Environment File
+#### Prerequisites
 
-Please make sure to add an `.env` file in the root folder of the project. This file should contain necessary environment variables, particularly for APIs to function properly.
+- **Docker Desktop:** Ensure Docker Desktop is installed and running on your machine. [Download Docker Desktop](https://www.docker.com/products/docker-desktop).
 
+#### Environment Variables
+
+- **.env File:**
+  - Create a `.env` file in the root directory.
+  - Include the following environment variables:
+    ```env
+    REACT_APP_GUARDIAN_API_KEY=your_guardian_api_key
+    REACT_APP_NYT_API_KEY=your_nyt_api_key
+    REACT_APP_NEWS_API_KEY=your_news_api_key
+    ```
+
+#### Building and Running with Docker Compose
+
+1. **Navigate to Project Root:**
+
+   Open **PowerShell** or **Command Prompt** and navigate to the root directory of your project: and 
+   run 
+   - docker-compose up --build
+#### Environment Variables
+
+- **.env File:**
+   - In the root directory of your project, create a `.env` file.
+   - Include the following environment variables with your respective API keys:
+
+     ```env
+     REACT_APP_GUARDIAN_API_KEY=your_guardian_api_key
+     REACT_APP_NYT_API_KEY=your_nyt_api_key
+     REACT_APP_NEWS_API_KEY=your_news_api_key
+     ```
+
+#### Troubleshooting
+
+- **WSL2 Issues:**
+  - Enable virtualization in BIOS.
+  - Enable "Virtual Machine Platform" and "Windows Subsystem for Linux":
+    ```powershell
+    dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
+    dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
+    ```
+  - Set WSL2 as default:
+    ```powershell
+    wsl --set-default-version 2
+    ```
+  - Restart your computer after making changes.
 
