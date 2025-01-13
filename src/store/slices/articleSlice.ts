@@ -26,6 +26,7 @@ export const fetchArticles = createAsyncThunk<
 export const setFilters = createAsyncThunk(
   'articles/setFilters',
   async (filters: ArticleState['activeFilters'], { dispatch }) => {
+    console.log('Setting filters in Redux:', filters); // Debug log
     dispatch(articleSlice.actions.updateActiveFilters(filters));
     return filters;
   }

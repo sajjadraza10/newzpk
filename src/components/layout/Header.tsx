@@ -75,7 +75,12 @@ const Header: React.FC<HeaderProps> = ({ onCategoryChange }) => {
       <FilterModal
         isOpen={isFilterModalOpen}
         onClose={() => setIsFilterModalOpen(false)}
-        onApply={(count) => setActiveFilters(count)}
+        onApply={(count) => {
+          setActiveFilters(count);
+          if (count > 0) {
+            handleCategoryChange(CategoryEnum.CUSTOMIZE_FEED);
+          }
+        }}
       />
     </header>
   );

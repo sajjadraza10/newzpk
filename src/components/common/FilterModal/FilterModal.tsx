@@ -31,6 +31,7 @@ export const FilterModal = memo(({
     getFilterByKey,
     getSelectedFiltersCount
   } = useFilter(defaultFilterSections);
+  const { activeFilters } = useAppSelector(state => state.articles);
 
   const handleReset = useCallback(() => {
     clearAllFilters();
@@ -38,6 +39,7 @@ export const FilterModal = memo(({
   }, [clearAllFilters, onApply]);
 
   const handleApply = useCallback(() => {
+    console.log('Applying filters:', activeFilters); // Debug log
     const filters = {
       sources: getFilterByKey('sources'),
       categories: getFilterByKey('categories')

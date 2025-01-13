@@ -1,10 +1,14 @@
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { clearArticles, fetchArticles, loadMoreArticles } from '../store/slices/articleSlice';
-import { Category, CategoryEnum, RootState, UseArticlesReturn } from '../types/types';
+import { Category, CategoryEnum, UseArticlesReturn } from '../types/types';
 
 export const useArticles = (category: Category): UseArticlesReturn => {
   const dispatch = useAppDispatch();
+  const isInitialMount = useRef(true);
+  const prevCategory = useRef(category);
+  const prevFilters = useRef<any>(null);
+  
   const { 
     items, 
     status, 
@@ -13,39 +17,81 @@ export const useArticles = (category: Category): UseArticlesReturn => {
     hasMore,
     searchQuery,
     activeFilters 
-  } = useAppSelector((state: RootState) => state.articles);
+  } = useAppSelector(state => state.articles);
 
-  useEffect(() => {
-    if (category === CategoryEnum.CUSTOMIZE_FEED && 
-        activeFilters.sources.length === 0 && 
-        activeFilters.categories.length === 0) {
-      return; // Don't fetch if no filters in customize feed
-    }
+//  useEffect(() => {
+//     const categoryChanged = prevCategory.current !== category;
+//     const filtersChanged = JSON.stringify(prevFilters.current) !== JSON.stringify(activeFilters);
+//     const isCustomizeFeed = category === CategoryEnum.CUSTOMIZE_FEED;
+//     const hasFilters = activeFilters.sources.length > 0 || activeFilters.categories.length > 0;
 
-    dispatch(clearArticles());
-    dispatch(fetchArticles({ 
-      category,
-      searchQuery,
-      filters: category === CategoryEnum.CUSTOMIZE_FEED ? activeFilters : undefined
-    }));
-  }, [
-    category, 
+//     console.log('UseArticles Effect:', {
+//       isInitialMount: isInitialMount.current,
+//       category,
+//       activeFilters,
+//       categoryChanged,
+//       filtersChanged,
+//       hasFilters,
+//       status
+//     });
+
+//     // Fetch conditions:
+//     // 1. Initial mount OR
+//     // 2. Category changed OR
+//     // 3. In customize feed with filter changes OR
+//     // 4. In customize feed with active filters
+//     const shouldFetch = 
+//       isInitialMount.current || 
+//       categoryChanged || 
+//       (isCustomizeFeed && filtersChanged && hasFilters);
+
+//     if (shouldFetch) {
+//       isInitialMount.current = false;
+//       prevCategory.current = category;
+//       prevFilters.current = {...activeFilters};
+
+//       dispatch(clearArticles());
+//       dispatch(fetchArticles({
+//         category: category,
+//         searchQuery,
+//         filters: activeFilters
+//       }));
+//     }
+//   }, [
+//     category,
+//     activeFilters, // Track all filter changes
+//     searchQuery,
+//     dispatch
+//   ]); 
+useEffect(() => {
+  const isCustomizeFeed = category === CategoryEnum.CUSTOMIZE_FEED;
+
+  dispatch(clearArticles());
+  dispatch(fetchArticles({
+    category,
     searchQuery,
-    // Only track filters when in customize feed
-    category === CategoryEnum.CUSTOMIZE_FEED ? JSON.stringify(activeFilters) : null,
-    dispatch
-  ]);
+    filters: isCustomizeFeed ? activeFilters : undefined
+  }));
+}, [category, activeFilters, searchQuery, dispatch]);
 
   const handleLoadMore = useCallback(() => {
     if (status !== 'loading' && hasMore) {
-      dispatch(loadMoreArticles({ 
-        category, 
+      dispatch(loadMoreArticles({
+        category: category,
         page: page + 1,
         searchQuery,
-        filters: category === CategoryEnum.CUSTOMIZE_FEED ? activeFilters : undefined 
+        filters: category === CategoryEnum.CUSTOMIZE_FEED ? activeFilters : undefined
       }));
     }
-  }, [status, hasMore, page, category, searchQuery, activeFilters, dispatch]);
+  }, [
+    status,
+    hasMore,
+    page,
+    category,
+    searchQuery,
+    activeFilters,
+    dispatch
+  ]);
 
   return {
     articles: items,

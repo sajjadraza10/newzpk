@@ -11,9 +11,8 @@ interface ArticleListProps {
 }
 
 const ArticleList: React.FC<ArticleListProps> = memo(({ category }) => {
-  const { articles, loading, categoryLoading, loadMore } = useArticles(
-    category === CategoryEnum.CUSTOMIZE_FEED ? CategoryEnum.NEWS : category
-  );
+  const { articles, loading, categoryLoading, loadMore } =
+    useArticles(category);
 
   const handleLoadMore = useCallback(() => {
     if (!loading) {
@@ -57,7 +56,7 @@ const ArticleList: React.FC<ArticleListProps> = memo(({ category }) => {
             danger
             size="large"
           >
-            {loading ? <LoadingSpinner /> : 'Read more'}
+            {loading ? <LoadingSpinner /> : "Read more"}
           </Button>
         </div>
       )}
