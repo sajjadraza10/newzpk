@@ -2,7 +2,7 @@
 
 ## Introduction
 
-Welcome to the **News Aggregate Challenge** application documentation. This project is a comprehensive news aggregator built with **React.js** and **TypeScript**, leveraging **Redux Toolkit** for state management, **React Router** for navigation. The application integrates multiple news sources to provide users with a personalized and seamless news reading experience across both desktop and mobile devices.
+Welcome to the **News Aggregate Challenge** application documentation. This project is a comprehensive news aggregator built with **React.js** and **TypeScript**, leveraging **Redux Toolkit** for state management. The application integrates multiple news sources to provide users with a personalized and seamless news reading experience across both desktop and mobile devices.
 
 ## UI/UX Inspiration
 
